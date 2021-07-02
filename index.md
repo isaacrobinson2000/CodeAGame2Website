@@ -1,6 +1,4 @@
-# Code A Game 2: A Step UP
-
-Welcome to code a game 2! In this class, you will learn how to code a 2D platforming using Javascript and web technoligies!
+Welcome to code a game 2! In this class, you will learn how to code a 2D platform game using Javascript and web technoligies!
 
 ### Class Goals
 
