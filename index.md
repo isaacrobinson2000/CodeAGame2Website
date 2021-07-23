@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 Welcome to code a game 2! In this class, you will learn how to code a 2D platform game using Javascript and web technoligies!
 
 ### Class Goals
@@ -17,4 +21,4 @@ This class will utilize a Jupyter notebooks for class content and coding. Follow
 
 See the finished games made and produced by prior Code a Game 2 classes!
 
-[Prior Class Games](games/gamelist.md)
+[Prior Class Games](games/gamelist.html)

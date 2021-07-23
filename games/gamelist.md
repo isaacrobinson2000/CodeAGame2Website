@@ -1,7 +1,11 @@
-[Home Page](../index.md) 
+---
+layout: default
+---
+
+[Home Page](../index.html) 
 
 # Prior Code A Game 2 Class Games
 
 ### Class of Summer 2021
-[Toasty the Blue Dude](toasty_the_blue_dude/toasty_the_blue_dude.md)
+[Toasty the Blue Dude](toasty_the_blue_dude/toasty_the_blue_dude.html)
 
