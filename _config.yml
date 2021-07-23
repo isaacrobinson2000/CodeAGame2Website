@@ -1,5 +1,5 @@
 github:
   is_project_page: false
-theme: jekyll-theme-hacker
+theme: jekyll-theme-midnight
 title: "Code-a-Game 2: A Step UP"
 description: "Learn to make games for the web."
