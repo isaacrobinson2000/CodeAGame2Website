@@ -1,5 +1,3 @@
----
----
 
 [Game Listing](../gamelist.md)
 
@@ -16,15 +14,4 @@ Made by the summer class of 2021.
 
 <button type="button" name="button" id="play-game-button" class="btn">Play the Game</button>
 
-<!--
-Credits:
 
- - Dawson Herbert
- - Ethan Vanblaricom
- - Jacob Shobe
- - James Sawyer
- - Josiah Sullivan
- - Liam Rogers
- - Logan Sidoruk
- - Tyler Coffin
-!-->

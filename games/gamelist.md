@@ -1,6 +1,3 @@
----
----
-
 [Home Page](../index.md) 
 
 # Prior Code A Game 2 Class Games
