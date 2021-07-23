@@ -13,8 +13,3 @@ This class will utilize a Jupyter notebooks for class content and coding. Follow
 
 [Jupyter Notebook Server](https://notebook.codeagame2.net/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fisaacrobinson2000%2FCodeAGame2Notebooks&urlpath=tree%2FCodeAGame2Notebooks%2F&branch=main)
 
-### Prior Class Games 
-
-See the finished games made and produced by prior Code a Game 2 classes!
-
-[Prior Class Games](games/gamelist.md)
