@@ -9,7 +9,7 @@ Welcome to code a game 2! In this class, you will learn how to code a 2D platfor
  - Learn how to write programs in the JavaScript programming language.
  - Learn about fundamental game and animation concepts, including rendering loops, animation sprites, collision management, etc.
  - Discover how games emulate the movements of real-life objects through dynamic simulation.
- - Design and code their own 2D platformer game, which they will showcase at the end of the class.
+ - Design and code your own 2D platformer game, which you will showcase at the end of the class.
 
 ### Link to the Notebook Server
 
