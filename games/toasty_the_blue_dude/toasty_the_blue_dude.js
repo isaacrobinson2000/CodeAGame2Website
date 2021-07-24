@@ -1,1 +1,443 @@
-"use strict";function _typeof(t){return(_typeof="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t})(t)}function _slicedToArray(t,e){return _arrayWithHoles(t)||_iterableToArrayLimit(t,e)||_unsupportedIterableToArray(t,e)||_nonIterableRest()}function _nonIterableRest(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}function _unsupportedIterableToArray(t,e){if(t){if("string"==typeof t)return _arrayLikeToArray(t,e);var i=Object.prototype.toString.call(t).slice(8,-1);return"Object"===i&&t.constructor&&(i=t.constructor.name),"Map"===i||"Set"===i?Array.from(t):"Arguments"===i||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(i)?_arrayLikeToArray(t,e):void 0}}function _arrayLikeToArray(t,e){(null==e||e>t.length)&&(e=t.length);for(var i=0,r=new Array(e);i<e;i++)r[i]=t[i];return r}function _iterableToArrayLimit(t,e){var i=null==t?null:"undefined"!=typeof Symbol&&t[Symbol.iterator]||t["@@iterator"];if(null!=i){var r,s,n=[],o=!0,a=!1;try{for(i=i.call(t);!(o=(r=i.next()).done)&&(n.push(r.value),!e||n.length!==e);o=!0);}catch(t){a=!0,s=t}finally{try{o||null==i.return||i.return()}finally{if(a)throw s}}return n}}function _arrayWithHoles(t){if(Array.isArray(t))return t}function _classCallCheck(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}function _defineProperties(t,e){for(var i=0;i<e.length;i++){var r=e[i];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(t,r.key,r)}}function _createClass(t,e,i){return e&&_defineProperties(t.prototype,e),i&&_defineProperties(t,i),t}function _inherits(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function");t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,writable:!0,configurable:!0}}),e&&_setPrototypeOf(t,e)}function _setPrototypeOf(t,e){return(_setPrototypeOf=Object.setPrototypeOf||function(t,e){return t.__proto__=e,t})(t,e)}function _createSuper(t){var e=_isNativeReflectConstruct();return function(){var i,r=_getPrototypeOf(t);if(e){var s=_getPrototypeOf(this).constructor;i=Reflect.construct(r,arguments,s)}else i=r.apply(this,arguments);return _possibleConstructorReturn(this,i)}}function _possibleConstructorReturn(t,e){return!e||"object"!==_typeof(e)&&"function"!=typeof e?_assertThisInitialized(t):e}function _assertThisInitialized(t){if(void 0===t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return t}function _isNativeReflectConstruct(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],function(){})),!0}catch(t){return!1}}function _getPrototypeOf(t){return(_getPrototypeOf=Object.setPrototypeOf?Object.getPrototypeOf:function(t){return t.__proto__||Object.getPrototypeOf(t)})(t)}var Player=function(t){_inherits(i,GameCollisionObject);var e=_createSuper(i);function i(t,r,s,n){var o;return _classCallCheck(this,i),(o=e.call(this,t,r,s,n))._inset=[11/32,7/32,1,1],o._spriteSize=[.375,23/32],o._movable=!0,o._vx=0,o._vx2=0,o._vel=.007,o._vy=0,o._vy2=0,o._ay=1e-4,o._boost=.022,o._wasUp=!1,o._numLeft=0,o._sprite=n.player.buildSprite(),o._initHP=20,o._hp=o._initHP,o._startInvTime=2e3,o._invulnTime=0,o._flashRate=100,o._minFall=.04,o._mult=50,o._dTime=1e3,o._dead=o._dTime,o._hasDied=!1,o._damage=5,o}return _createClass(i,[{key:"update",value:function(t,e){this._invulnTime=Math.max(this._invulnTime-t,0);var i=this._vx2;if("ArrowUp"in e.keysPressed&&!this._wasUp&&this._numLeft>0&&(this._vy-=this._boost,this._numLeft--),"ArrowLeft"in e.keysPressed&&(i-=this._vel),"ArrowRight"in e.keysPressed&&(i+=this._vel),this._hasDied?(this._dead-=t,this._sprite.setAnimation("die")):this._numLeft>=2&&0!=i?this._sprite.setAnimation("run"):this._sprite.setAnimation("stand"),this._sprite.update(t),this.x=i*t+this.x,this._vx2=0,this._vy=this._ay*t+this._vy,this._vy2=this._vy,this.y=this._vy*t+this.y,this._wasUp="ArrowUp"in e.keysPressed,(this._hp<=0||this.y+this._spriteSize[1]>=e.level.numChunks[1]*e.level.chunkSize)&&(this._hasDied=!0,this._collisionSides={},this._hp=this._initHP,this._vy-=this._boost),this._dead<=0)return this._collisionSides={top:!0,bottom:!0,left:!0,right:!0},this._dead=this._dTime,this._hasDied=!1,!0}},{key:"draw",value:function(t,e,i){var r=_slicedToArray(this._inset,4),s=r[0],n=r[1],o=r[2],a=r[3],l=this.x*this._blockSize-s*this._blockSize,c=this.y*this._blockSize-n*this._blockSize,_=_slicedToArray(i.transformBox([l,c,o*this._blockSize,a*this._blockSize]),4),h=_[0],u=_[1],p=_[2],y=_[3];Math.floor(this._invulnTime/this._flashRate)%2==0&&(this._sprite.draw(e,h,u,p,y),e.fillStyle="black",e.font="italic small-caps 30px fantasy",e.fillText("Hp: "+this._hp,0,30))}},{key:"drawPreview",value:function(t,e,i){var r=_slicedToArray(i,4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}},{key:"handleCollisions",value:function(t,e){"bottom"==e?(this._vy2>=this._minFall&&this._invulnTime<=0&&(this._hp-=Math.floor(this._vy2*this._mult),this._invulnTime=this._startInvTime),this._numLeft=2):t instanceof Entity&&this._invulnTime<=0&&(this._hp-=t._damage,this._invulnTime=this._startInvTime)}},{key:"getHitBox",value:function(){var t=_slicedToArray(this._spriteSize,2),e=t[0],i=t[1];return[this.x,this.y,e,i]}}]),i}(),Entity=function(t){_inherits(i,GameCollisionObject);var e=_createSuper(i);function i(t,r,s,n){var o;return _classCallCheck(this,i),(o=e.call(this,t,r,s,n))._inset=[18/64,14/64,1,1],o._spriteSize=[26/64,34/64],o._vel=2e-4,o._movable=!0,o._vx=0,o._vy=0,o._ay=1e-4,o._dist=5,o._damage=5,o._knockBack=.1,o._hp=5,o._sprite=n.imposter.buildSprite(),o}return _createClass(i,[{key:"update",value:function(t,e){var i=_slicedToArray(e.getPlayer().getHitBox(),4),r=i[0],s=i[1],n=r+i[2]/2,o=s+i[3]/2,a=_slicedToArray(this.getHitBox(),4),l=a[0],c=a[1],_=l+a[2]/2,h=c+a[3]/2;if(Math.sqrt(Math.pow(_-n,2)+Math.pow(h-o,2))<this._dist?this._vx=this._vel*Math.sign(n-_)*t:this._vx=0,0==this._vx?this._sprite.setAnimation("stand"):this._sprite.setAnimation("run"),this._sprite.update(t),this.x=this._vx*t+this.x,this._vy=this._ay*t+this._vy,this.y=this._vy*t+this.y,this._hp<=0||this.y+this._spriteSize[1]>=e.level.numChunks[1]*e.level.chunkSize)return!0}},{key:"draw",value:function(t,e,i){var r=_slicedToArray(this._inset,4),s=r[0],n=r[1],o=r[2],a=r[3],l=this.x*this._blockSize-s*this._blockSize,c=this.y*this._blockSize-n*this._blockSize,_=_slicedToArray(i.transformBox([l,c,o*this._blockSize,a*this._blockSize]),4),h=_[0],u=_[1],p=_[2],y=_[3];this._sprite.draw(e,h,u,p,y)}},{key:"drawPreview",value:function(t,e,i){var r=_slicedToArray(i,4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}},{key:"handleCollisions",value:function(t,e){t instanceof Player&&"top"==e&&(this._hp-=t._damage)}},{key:"getHitBox",value:function(){var t=_slicedToArray(this._spriteSize,2),e=t[0],i=t[1];return[this.x,this.y,e,i]}}]),i}(),Block=function(t){_inherits(i,GameCollisionObject);var e=_createSuper(i);function i(t,r,s,n){var o;return _classCallCheck(this,i),(o=e.call(this,t,r,s,n))._sprite=n.blocks.buildSprite(),o._sprite.setAnimation("block"),o}return _createClass(i,[{key:"update",value:function(t,e){this._sprite.update(t)}},{key:"draw",value:function(t,e,i){var r=_slicedToArray(i.transformBox([this.x*this._blockSize,this.y*this._blockSize,this._blockSize,this._blockSize]),4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}},{key:"drawPreview",value:function(t,e,i){var r=_slicedToArray(i,4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}}]),i}(),Block2=function(t){_inherits(i,GameCollisionObject);var e=_createSuper(i);function i(t,r,s,n){var o;return _classCallCheck(this,i),(o=e.call(this,t,r,s,n))._sprite=n.blocks.buildSprite(),o._sprite.setAnimation("block2"),o}return _createClass(i,[{key:"update",value:function(t,e){this._sprite.update(t)}},{key:"draw",value:function(t,e,i){var r=_slicedToArray(i.transformBox([this.x*this._blockSize,this.y*this._blockSize,this._blockSize,this._blockSize]),4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}},{key:"drawPreview",value:function(t,e,i){var r=_slicedToArray(i,4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}}]),i}(),Block3=function(t){_inherits(i,GameCollisionObject);var e=_createSuper(i);function i(t,r,s,n){var o;return _classCallCheck(this,i),(o=e.call(this,t,r,s,n))._sprite=n.blocks.buildSprite(),o._sprite.setAnimation("block3"),o}return _createClass(i,[{key:"update",value:function(t,e){this._sprite.update(t)}},{key:"draw",value:function(t,e,i){var r=_slicedToArray(i.transformBox([this.x*this._blockSize,this.y*this._blockSize,this._blockSize,this._blockSize]),4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}},{key:"drawPreview",value:function(t,e,i){var r=_slicedToArray(i,4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}}]),i}(),Block4=function(t){_inherits(i,GameCollisionObject);var e=_createSuper(i);function i(t,r,s,n){var o;return _classCallCheck(this,i),(o=e.call(this,t,r,s,n))._sprite=n.blocks.buildSprite(),o._sprite.setAnimation("block4"),o}return _createClass(i,[{key:"update",value:function(t,e){this._sprite.update(t)}},{key:"draw",value:function(t,e,i){var r=_slicedToArray(i.transformBox([this.x*this._blockSize,this.y*this._blockSize,this._blockSize,this._blockSize]),4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}},{key:"drawPreview",value:function(t,e,i){var r=_slicedToArray(i,4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}}]),i}(),Block5=function(t){_inherits(i,GameCollisionObject);var e=_createSuper(i);function i(t,r,s,n){var o;return _classCallCheck(this,i),(o=e.call(this,t,r,s,n))._sprite=n.blocks.buildSprite(),o._sprite.setAnimation("block5"),o}return _createClass(i,[{key:"update",value:function(t,e){this._sprite.update(t)}},{key:"draw",value:function(t,e,i){var r=_slicedToArray(i.transformBox([this.x*this._blockSize,this.y*this._blockSize,this._blockSize,this._blockSize]),4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}},{key:"drawPreview",value:function(t,e,i){var r=_slicedToArray(i,4),s=r[0],n=r[1],o=r[2],a=r[3];this._sprite.draw(e,s,n,o,a)}}]),i}();$(document).ready(function(){var t={sprites:{blocks:{image:"sprites/blocks.png",animations:{block:{frames:[0]},block2:{frames:[1]},block3:{frames:[2]},block4:{frames:[3]},block5:{frames:[4]}}},player:{image:"sprites/player.png",width:32,animations:{run:{frames:[1,2,3],speed:100},stand:{frames:[0]},die:{frames:[4]}}},imposter:{image:"sprites/enemy.png",animations:{stand:{frames:[0]},run:{frames:[0,1,2],speed:100}}}}};$("#play-game-button").on("click",function(){element.makeGame("levels/test_level.json",[Block,Block2,Block3,Block4,Block5],[Entity],t,Player)})});
+/*
+ * PLAYER TEAM CODE.
+ */
+class Player extends GameCollisionObject {
+    constructor(x, y, blockSize, sprites) {
+        super(x, y, blockSize, sprites);
+        
+        this._inset = [11/32, 7/32, 1, 1];
+        this._spriteSize = [12/32, 23/32];
+        this._movable = true;
+        this._vx = 0;
+        this._vx2 = 0;
+        this._vel = 7/1000;
+    
+        this._vy = 0;
+        this._vy2 = 0;
+        this._ay = 0.1/1000;
+        this._boost = 22/1000;
+        this._wasUp = false;
+        this._numLeft = 0;
+        this._sprite = sprites.player.buildSprite();
+        
+        this._initHP = 20;
+        this._hp = this._initHP;
+        this._startInvTime = 2000;
+        this._invulnTime = 0;
+        this._flashRate = 100;
+        this._minFall = 40/1000;
+        this._mult = 50;
+        
+        this._dTime = 1000;
+        this._dead = this._dTime;
+        this._hasDied = false;
+        
+        this._damage = 5;
+    }
+    
+    update(timeStep, gameState) {
+        // Update code here. Returning true resets the entire level.
+        // NOTE: not for this lesson :) 
+        this._invulnTime = Math.max(this._invulnTime - timeStep, 0);
+        
+        let v = this._vx2;
+        if('ArrowUp' in gameState.keysPressed && !this._wasUp && this._numLeft > 0){
+            this._vy -= this._boost;
+            this._numLeft--;
+        }
+        
+        if('ArrowLeft' in gameState.keysPressed){
+            v -= this._vel;
+        }
+        
+        if ('ArrowRight'  in gameState.keysPressed){
+            v += this._vel;
+        }
+        
+        if(this._hasDied) {
+            this._dead -= timeStep;
+            this._sprite.setAnimation("die");
+        }
+        else if(this._numLeft >= 2 && v != 0) {
+            this._sprite.setAnimation("run");
+        }
+        else {
+            this._sprite.setAnimation("stand");
+        }
+        
+        this._sprite.update(timeStep);
+        
+        this.x = v * timeStep + this.x;
+        this._vx2 = 0;
+        
+        this._vy = this._ay * timeStep + this._vy;
+        this._vy2 = this._vy;
+        this.y = this._vy * timeStep + this.y
+        this._wasUp = "ArrowUp" in gameState.keysPressed;
+        
+        if((this._hp <= 0) 
+           || (this.y + this._spriteSize[1] >= (gameState.level.numChunks[1] * gameState.level.chunkSize))) {
+            this._hasDied = true;
+            this._collisionSides = {};
+            this._hp = this._initHP;
+            this._vy -= this._boost;
+        }
+        
+        if(this._dead <= 0) {
+            this._collisionSides = {"top": true, "bottom": true, "left": true, "right": true};
+            this._dead = this._dTime;
+            this._hasDied = false;
+            return true;
+        }
+    }
+    
+    draw(canvas, painter, camera) {
+        // Draw code here...
+        let [xi, yi, wi, hi] = this._inset;
+        let [inx, iny] = [
+            (this.x * this._blockSize) - (xi * this._blockSize), 
+            (this.y * this._blockSize) - (yi * this._blockSize)
+        ];
+        let [cx, cy, cw, ch] = camera.transformBox([inx, iny, wi * this._blockSize, hi * this._blockSize]);
+        
+        if(Math.floor(this._invulnTime / this._flashRate) % 2 == 0) {
+            this._sprite.draw(painter, cx, cy, cw, ch);
+
+            painter.fillStyle = "black";
+            painter.font = "italic small-caps 30px fantasy";
+            painter.fillText("Hp: " + this._hp, 0, 30);
+        }
+    }
+    
+    drawPreview(canvas, painter, box) {
+        // Draw preview code here...
+        let [cx, cy, cw, ch] = box;
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+    
+    handleCollisions(obj, side) {
+        if(side == "bottom") {
+            if(this._vy2 >= this._minFall && this._invulnTime <= 0) {
+                this._hp -= Math.floor(this._vy2 * this._mult);
+                this._invulnTime = this._startInvTime;
+            }
+            this._numLeft = 2;
+        }
+        else if(obj instanceof Entity && this._invulnTime <= 0) {
+            this._hp -= obj._damage;
+            this._invulnTime = this._startInvTime;
+        }
+    }
+    
+    getHitBox() {
+        let [sw, sh] = this._spriteSize;
+        return [this.x, this.y, sw, sh];
+    }
+}
+
+
+/*
+ * ENEMY TEAM CODE.
+ */
+class Entity extends GameCollisionObject {
+    constructor(x, y, blockSize, sprites) {
+        super(x, y, blockSize, sprites);
+        // More initialization here...
+        // NOTE: not for this lesson :) 
+        this._inset = [18/64, 14/64, 1, 1];
+        this._spriteSize = [26/64, 34/64];
+        this._vel = 0.2/1000;
+        this._movable = true;
+        this._vx = 0;
+        this._vy = 0;
+        this._ay = 0.1 / 1000
+        this._dist = 5;
+        this._damage = 5;
+        //this._collisionSides = {"top": true, "bottom": true};
+        
+        this._knockBack = 100/1000;
+        this._hp = 5;
+        
+        this._sprite = sprites.imposter.buildSprite();
+    }
+    
+    update(timeStep, gameState) {
+        // Update code here. Returning true destroys the enemy.
+        // NOTE: not for this lesson :) 
+        let player = gameState.getPlayer();
+        let [x, y, w, h] = player.getHitBox();
+        let [cx, cy] = [x + w / 2, y + h / 2];
+        
+        let [ex, ey, ew, eh] = this.getHitBox();
+        let [ecx, ecy] = [ex + ew / 2, ey + eh / 2]
+        
+        let dist = Math.sqrt((ecx - cx) ** 2 + (ecy - cy) ** 2);
+        
+        if(dist < this._dist) {
+            this._vx = this._vel * Math.sign(cx - ecx) * timeStep;
+        } else {
+            this._vx = 0;
+        }
+        
+        if(this._vx == 0) {
+            this._sprite.setAnimation("stand");
+        }
+        else {
+            this._sprite.setAnimation("run");
+        }
+        
+        this._sprite.update(timeStep);
+        
+        this.x = this._vx * timeStep + this.x;
+        this._vy = this._ay * timeStep + this._vy;
+        this.y = this._vy * timeStep + this.y;
+        
+        if(this._hp <= 0 
+           || (this.y + this._spriteSize[1] >= (gameState.level.numChunks[1] * gameState.level.chunkSize))) {
+            return true;
+        }
+    }
+    
+    draw(canvas, painter, camera) {
+        // Draw code here...
+        let [xi, yi, wi, hi] = this._inset;
+        let [inx, iny] = [
+            (this.x * this._blockSize) - (xi * this._blockSize), 
+            (this.y * this._blockSize) - (yi * this._blockSize)
+        ];
+        let [cx, cy, cw, ch] = camera.transformBox([inx, iny, wi * this._blockSize, hi * this._blockSize]);
+        
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+    
+    drawPreview(canvas, painter, box) {
+        // Draw preview code here...
+        let [cx, cy, cw, ch] = box;
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+    
+    handleCollisions(obj, side) {
+        if((obj instanceof Player) && (side == "top")) {
+            this._hp -= obj._damage;
+        }
+    }
+       
+    getHitBox() {
+        let [sw, sh] = this._spriteSize;
+        return [this.x, this.y, sw, sh]
+    }
+}
+
+
+/*
+ * BLOCK TEAM CODE.
+ */
+class Block extends GameCollisionObject {
+    constructor(x, y, blockSize, sprites) {
+        super(x, y, blockSize, sprites);
+        // More initialization here...
+        // NOTE: not for this lesson :) 
+        this._sprite = sprites.blocks.buildSprite();
+        this._sprite.setAnimation("block");
+    }
+    
+    update(timeStep, gameState) {
+        // Update code here. Returning true destroys the block.
+        // NOTE: not for this lesson :) 
+        this._sprite.update(timeStep);
+    }
+    
+    draw(canvas, painter, camera) {
+        // Draw code here...
+        let [cx, cy, cw, ch] = camera.transformBox([this.x * this._blockSize , this.y * this._blockSize, this._blockSize, this._blockSize]);
+                
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+    
+    drawPreview(canvas, painter, box) {
+        // Draw preview code here...
+        let [cx, cy, cw, ch] = box;
+        
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+}
+
+class Block2 extends GameCollisionObject {
+    constructor(x, y, blockSize, sprites) {
+        super(x, y, blockSize, sprites);
+        // More initialization here...
+        // NOTE: not for this lesson :) 
+        this._sprite = sprites.blocks.buildSprite();
+        this._sprite.setAnimation("block2");
+    }
+    
+    update(timeStep, gameState) {
+        // Update code here. Returning true destroys the block.
+        // NOTE: not for this lesson :) 
+        this._sprite.update(timeStep);
+    }
+    
+    draw(canvas, painter, camera) {
+        // Draw code here...
+        let [cx, cy, cw, ch] = camera.transformBox([this.x * this._blockSize , this.y * this._blockSize, this._blockSize, this._blockSize]);
+                
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+    
+    drawPreview(canvas, painter, box) {
+        // Draw preview code here...
+        let [cx, cy, cw, ch] = box;
+        
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+}
+
+class Block3 extends GameCollisionObject {
+    constructor(x, y, blockSize, sprites) {
+        super(x, y, blockSize, sprites);
+        // More initialization here...
+        // NOTE: not for this lesson :) 
+        this._sprite = sprites.blocks.buildSprite();
+        this._sprite.setAnimation("block3");
+    }
+    
+    update(timeStep, gameState) {
+        // Update code here. Returning true destroys the block.
+        // NOTE: not for this lesson :) 
+        this._sprite.update(timeStep);
+    }
+    
+    draw(canvas, painter, camera) {
+        // Draw code here...
+        let [cx, cy, cw, ch] = camera.transformBox([this.x * this._blockSize , this.y * this._blockSize, this._blockSize, this._blockSize]);
+                
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+    
+    drawPreview(canvas, painter, box) {
+        // Draw preview code here...
+        let [cx, cy, cw, ch] = box;
+        
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+}
+
+class Block4 extends GameCollisionObject {
+    constructor(x, y, blockSize, sprites) {
+        super(x, y, blockSize, sprites);
+        // More initialization here...
+        // NOTE: not for this lesson :) 
+        this._sprite = sprites.blocks.buildSprite();
+        this._sprite.setAnimation("block4");
+    }
+    
+    update(timeStep, gameState) {
+        // Update code here. Returning true destroys the block.
+        // NOTE: not for this lesson :) 
+        this._sprite.update(timeStep);
+    }
+    
+    draw(canvas, painter, camera) {
+        // Draw code here...
+        let [cx, cy, cw, ch] = camera.transformBox([this.x * this._blockSize , this.y * this._blockSize, this._blockSize, this._blockSize]);
+                
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+    
+    drawPreview(canvas, painter, box) {
+        // Draw preview code here...
+        let [cx, cy, cw, ch] = box;
+        
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+}
+
+class Block5 extends GameCollisionObject {
+    constructor(x, y, blockSize, sprites) {
+        super(x, y, blockSize, sprites);
+        // More initialization here...
+        // NOTE: not for this lesson :) 
+        this._sprite = sprites.blocks.buildSprite();
+        this._sprite.setAnimation("block5");
+    }
+    
+    update(timeStep, gameState) {
+        // Update code here. Returning true destroys the block.
+        // NOTE: not for this lesson :) 
+        this._sprite.update(timeStep);
+    }
+    
+    draw(canvas, painter, camera) {
+        // Draw code here...
+        let [cx, cy, cw, ch] = camera.transformBox([this.x * this._blockSize , this.y * this._blockSize, this._blockSize, this._blockSize]);
+                
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+    
+    drawPreview(canvas, painter, box) {
+        // Draw preview code here...
+        let [cx, cy, cw, ch] = box;
+        
+        this._sprite.draw(painter, cx, cy, cw, ch);
+    }
+}
+
+$(document).ready(function() {
+    // We'll learn about this later....
+    let spriteData = {
+        sprites: {
+            blocks: {
+                image: "sprites/blocks.png",
+                animations: {
+                    block: {
+                        frames: [0]
+                    },
+                    block2: {
+                        frames: [1]
+                    },
+                    block3: {
+                        frames: [2]
+                    },
+                    block4: {
+                        frames: [3]
+                    },
+                    block5: {
+                        frames: [4]
+                    },
+                }
+            },
+            player: {
+                image: "sprites/player.png",
+                width: 32,
+                animations: {
+                    run: {
+                        frames: [1, 2, 3],
+                        speed: 100
+                    },
+                    stand: {
+                        frames: [0]
+                    },
+                    die: {
+                        frames: [4]
+                    }
+                }
+            },
+            imposter: {
+                image: "sprites/enemy.png",
+                animations: {
+                    stand: {
+                        frames: [0]
+                    },
+                    run: {
+                        frames: [0, 1, 2],
+                        speed: 100
+                    }
+                }
+            }
+        }
+    };
+    
+    $("#play-game-button").on("click", function() {
+        element.makeGame("levels/test_level.json", [Block, Block2, Block3, Block4, Block5], [Entity], spriteData, Player);
+    });
+});
