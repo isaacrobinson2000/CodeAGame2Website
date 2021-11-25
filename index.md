@@ -22,3 +22,9 @@ This class will utilize a Jupyter notebooks for class content and coding. Follow
 See the finished games made and produced by prior Code a Game 2 classes!
 
 [Prior Class Games](games/gamelist.html){: .btn}
+
+### Class Demo Game
+
+Explore what is possible, by checking out the demo game below!
+
+[Demo Game](games/demo/demo.html){: .btn}
