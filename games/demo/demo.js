@@ -1,4 +1,5 @@
 // Game code goes here....
+
 class LogBlock extends GameCollisionObject {
     constructor(x, y, assets) {
         super(x, y, assets);
@@ -126,22 +127,54 @@ class Grass extends GameObject {
     }
 }
 
-class Player extends GameCollisionObject {
+class PhysicsObject extends GameCollisionObject {
     constructor(x, y, assets) {
         super(x, y, assets);
-        this._sprite = assets.sprites.playerSprite.buildSprite();
-        this._sprite.setAnimation("stand");
-        this._inset = [4 / 32, 4 / 32, 28 / 32, 24 / 32];
         this._vx = 0;
         this._vy = 0;
         this._pvx = 0;
         this._pvy = 0;
         this._ax = 0;
         this._ay = 0.085 / 1000;
+        this._airResistanceNormal = 0.05 / 1000;
+        this._airResistance = 0.05 / 1000;
+        this._terminalVelX = 10 / 1000;
+        this._terminalVelY = Infinity;
+        this._stopAccelX = 0.05 / 1000;
+        this._slowOnNoInput = true;
+    }
+    
+    update(timeStep, gameState) {
+        if(this._slowOnNoInput && this._ax == 0) this._ax = -Math.min(this._stopAccelX, Math.abs(this._vx) / timeStep) * Math.sign(this._vx);
+        if(this._ax != this._ax) this._ax = 0;
+        this._vx += this._ax * timeStep;
+        this._vx -= Math.sign(this._vx) * timeStep * this._airResistance * (this._vx) ** 2;
+        this._vx = Math.sign(this._vx) * Math.min(Math.abs(this._vx), this._terminalVelX)
+        
+        this._vy += this._ay * timeStep;
+        this._dragY = timeStep * this._vy;
+        this._vy -= Math.sign(this._vy) * timeStep * this._airResistance * (this._vy) ** 2;
+        this._vy = Math.sign(this._vy) * Math.min(Math.abs(this._vy), this._terminalVelY)
+
+        this._pvx = this._vx;
+        this._pvy = this._vy;
+
+        this.x += this._vx * timeStep;
+        this.y += this._vy * timeStep;
+        this._airResistance = this._airResistanceNormal;        
+    }
+}
+
+class Player extends PhysicsObject {
+    constructor(x, y, assets) {
+        super(x, y, assets);
+        
+        this._sprite = assets.sprites.playerSprite.buildSprite();
+        this._sprite.setAnimation("stand");
+        this._inset = [4 / 32, 4 / 32, 28 / 32, 24 / 32];
         this._priorUp = false;
         this._numJumps = Infinity;
-        this._fric_facx = 0.915;
-        this._fric_facy = 0.999;
+        
         this._waitTime = 0;
         this._accept_inputs = true;
         
@@ -175,17 +208,17 @@ class Player extends GameCollisionObject {
         
         if(this._accept_inputs) {
             if("ArrowLeft" in keys) {
-                this._ax -= 0.1 / 1000;
+                this._ax -= 0.075 / 1000;
                 anim = "run";
                 this._sprite.setHorizontalFlip(true);
             }
             if("ArrowRight" in keys) {
-                this._ax += 0.1 / 1000;
+                this._ax += 0.075 / 1000;
                 anim = "run";
                 this._sprite.setHorizontalFlip(false);
             }
             if(!this._priorUp && ("ArrowUp" in keys) && (this._numJumps > 0)) {
-                this._vy = -22 / 1000;
+                this._vy -= 22 / 1000;
                 this._numJumps--;
                 anim = "jump";
             }
@@ -195,24 +228,15 @@ class Player extends GameCollisionObject {
         
             if(this._in_water) this._sprite.setAnimation("water");
             this._in_water = false;
-
-            this._vx += this._ax * timeStep;
-            this._vx *= this._fric_facx;
-            this._vy += this._ay * timeStep;
-            this._vy *= this._fric_facy;
-
-            this._pvx = this._vx;
-            this._pvy = this._vy;
-
-            this.x += this._vx * timeStep;
-            this.y += this._vy * timeStep;
+            this._waitTime = Math.max(0, this._waitTime - timeStep);
+            
+            super.update(timeStep, gameState);
         }
         
         let [__x, __y, w, h] = gameState.getLevelBounds();
         if((this.y + this._inset[3]) >= h) gameState.exitZone(gameState.zoneName);
         
         this._sprite.update(timeStep);
-        this._fric_facy = 0.9999;
     }
     
     draw(canvas, painter, camera) {
@@ -237,7 +261,7 @@ class Player extends GameCollisionObject {
             this._in_water = true;
             return;
         }
-
+        
         if(side == "inside") return;
         if(side == "bottom") {
             this._numJumps = 2;
@@ -255,7 +279,9 @@ class Player extends GameCollisionObject {
         }
         
         if(side == "left" || side == "right") {
-            if(!(obj instanceof Ball)) this._vx = 0;
+            if(!(obj instanceof Ball)) {
+                this._vx = 0;
+            }
             else this._hit_sound.play();
         }
     }
@@ -272,21 +298,18 @@ class Player extends GameCollisionObject {
 }
 
 
-class Enemy extends GameCollisionObject {
+class Enemy extends PhysicsObject {
     constructor(x, y, assets) {
         super(x, y, assets);
         this.__ss = assets.sprites;
         this._sprite = assets.sprites.enemySprite.buildSprite();
         this._sprite.setAnimation("stand");
-        this._vx = 0;
-        this._vy = 0;
-        this._ax = 0;
-        this._ay = 0.09 / 1000;
-        this._fric_fac = 0.95;
+        
         this._inset = [10 / 32, 0 / 32, 73 / 32, 16 / 32];
         this._blocksBelow = [false, false];
         
         this._hp = 5;
+        this._terminalVelX = 5 / 1000;
         
         this._movable = true;
         this._gState = null;
@@ -316,16 +339,13 @@ class Enemy extends GameCollisionObject {
         else this._sprite.setAnimation("stand");
         
         this.updateBlockInfo(timeStep, gameState);
-        if(!this._blocksBelow[(this._ax < 0)? 0: 1]) this._ax *= -1;
+        if(!this._blocksBelow[(this._ax < 0)? 0: 1]) {
+            this._ax *= -1;
+            this._ax = Math.sign(this._ax) * Math.min(Math.abs(this._ax), Math.abs(this._vx / timeStep));
+            if(this._ax != this._ax) this._ax = 0;
+        }
         
-        this._vx += this._ax * timeStep;
-        this._vx *= this._fric_fac;
-                
-        this._vy += this._ay * timeStep;
-        this._vy *= this._fric_fac;
-        
-        this.x += this._vx * timeStep;
-        this.y += this._vy * timeStep;
+        super.update(timeStep, gameState)
         
         this._sprite.update(timeStep);
     }
@@ -370,38 +390,37 @@ class Enemy extends GameCollisionObject {
     }
 }
 
-class Ball extends GameCollisionObject {
+class Ball extends PhysicsObject {
     constructor(x, y, assets) {
         super(x, y, assets);
         this._sprite = assets.sprites.beachBallSprite.buildSprite();
         this._sprite.setAnimation("still");
+        
         this._vx = 0;
         this._vy = 0;
         this._ay = 0.04 / 1000;
-        this._fric_fac = 0.95;
+        this._ax = 0;
+        this._slowOnNoInput = false;
+        this._stopAccelX = 0.1 / 1000;
+        
         this._inset = [10 / 32, 0 / 32, 73 / 32, 16 / 32];
         this._blocksBelow = [false, false];
         
-        this._hp = 5;
+        this._airResistanceNormal = 0.3;
         
         this._movable = true;
     }
     
     update(timeStep, gameState) {
-        this._vx *= this._fric_fac;
-        this._vy += this._ay * timeStep;
-        this._vy *= this._fric_fac;
-        
-        this._pvx = this._vx;
-        this._pvy = this._vy;
-        
-        this.x += this._vx * timeStep;
-        this.y += this._vy * timeStep;
+        this._ax = 0;
+        super.update(timeStep, gameState)
         
         if(Math.abs(this._vx) > 0.0001) this._sprite.setAnimation("spin");
         else this._sprite.setAnimation("still");
         this._sprite.setHorizontalFlip(this._vx < 0);
         this._sprite.update(timeStep);
+        
+        this._slowOnNoInput = false;
     }
     
     draw(canvas, painter, camera) {
@@ -416,7 +435,9 @@ class Ball extends GameCollisionObject {
     
     handleCollision(obj, side) {
         if(obj instanceof Water || obj instanceof WaterTop) return;
+        if(side == "bottom" || side == "inside") this._slowOnNoInput = true;
         if(side == "inside") return;
+        
         if(side == "top" || side == "bottom") {
             if(obj instanceof Ball) {
                 this._vy = ((side == "top")? 1: -1) * Math.abs(obj._vy) * 0.8;
@@ -429,12 +450,13 @@ class Ball extends GameCollisionObject {
             let vx = this._vx;
             
             if(obj instanceof Ball) {
-                this._vx = ((side == "left")? 1: -1) * Math.abs(obj._vx) * 0.8;
-                this._vy -= 0.02;
+                this._vx = ((side == "left")? 1: -1) * Math.abs(obj._vx);
+                this._vy -= 0.01;
             }
             else {
-                this._vx = ((side == "left")? 1: -1) * Math.abs(this._vx + 0.01) + (obj._vx ?? 0) * 0.8;
-                this._vy -= 0.02;
+                let c = (obj instanceof PhysicsObject)? 1: 0.2;
+                this._vx = (((side == "left")? 1: -1) * Math.abs(this._vx + 0.01) + (obj._vx ?? 0)) * c;
+                this._vy -= 0.01;
             }
         }
     }
@@ -445,11 +467,13 @@ class WaterTop extends GameCollisionObject {
         super(x, y, assets);
         this._sprite = assets.sprites.water.buildSprite();
         this._sprite.setAnimation("top");
-        this._weight = 2 / 1000;
+        this._weight = 0.25 / 1000;
+        this._timeStep = 0;
     }
     
     update(timeStep, gameState) {
         this._sprite.update(timeStep);
+        this._timeStep = timeStep;
     }
     
     draw(canvas, painter, camera) {
@@ -463,9 +487,9 @@ class WaterTop extends GameCollisionObject {
     }
     
     handleCollision(obj, side) {
-        if(obj instanceof Player) {
-            obj._fric_facy = 0.95;
-            obj._numJumps = 2;
+        if(obj instanceof PhysicsObject) {
+            obj._airResistance = 0.75;
+            if(obj instanceof Player) obj._numJumps = 2;
         }
         // Compute the boyant force... and add it onto the objects velocity...
         let [wx, wy, ww, wh] = this.getBoundingBox();
@@ -473,7 +497,7 @@ class WaterTop extends GameCollisionObject {
 
         let yIn = Math.min(Math.abs((wy + wh) - oy), Math.abs((oy + oh) - wy));
         let xIn = Math.min(Math.abs((wx + ww) - ox), Math.abs((ox + ow) - wx))
-        obj._vy -= ((xIn * yIn) / (ww * wh)) * this._weight;
+        obj._vy -= ((xIn * yIn) / (ww * wh)) * this._weight * this._timeStep;
     }
     
     isSolid() {
@@ -494,11 +518,13 @@ class Water extends GameCollisionObject {
         super(x, y, assets);
         this._sprite = assets.sprites.water.buildSprite();
         this._sprite.setAnimation("below");
-        this._weight = 2 / 1000;
+        this._weight = 0.25 / 1000;
+        this._timeStep = 0
     }
     
     update(timeStep, gameState) {
         this._sprite.update(timeStep);
+        this._timeStep = timeStep;
     }
     
     draw(canvas, painter, camera) {
@@ -512,9 +538,9 @@ class Water extends GameCollisionObject {
     }
     
     handleCollision(obj, side) {
-        if(obj instanceof Player) {
-            obj._fric_facy = 0.95;
-            obj._numJumps = 2;
+        if(obj instanceof PhysicsObject) {
+            obj._airResistance = 0.75;
+            if(obj instanceof Player) obj._numJumps = 2;
         }
         // Compute the boyant force... and add it onto the objects velocity...
         let [wx, wy, ww, wh] = this.getBoundingBox();
@@ -522,7 +548,7 @@ class Water extends GameCollisionObject {
         
         let yIn = Math.min(Math.abs((wy + wh) - oy), Math.abs((oy + oh) - wy));
         let xIn = Math.min(Math.abs((wx + ww) - ox), Math.abs((ox + ow) - wx))
-        obj._vy -= ((xIn * yIn) / (ww * wh)) * this._weight;
+        obj._vy -= ((xIn * yIn) / (ww * wh)) * this._weight * this._timeStep;
     }
     
     isSolid() {
