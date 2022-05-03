@@ -1222,42 +1222,36 @@ class SweepAndPrune {
             let [objIdx, isEnd] = this._xs[i];
             this._objects[objIdx][(isEnd)? 3: 2] = i;
         }
-        
         for(let i = 0; i < this._ys.length; i++) {
             let [objIdx, isEnd] = this._ys[i];
             this._objects[objIdx][(isEnd)? 5: 4] = i;
         }
         
-        let cols = {};
-        
+        let xCount = 0;
+        let yCount = 0;
+        for(let [obj, box, xS, xE, yS, yE] of this._objects) {
+            xCount += xE - xS;
+            yCount += yE - yS;
+        }
+                
+        let arr = (xCount <= yCount)? this._xs: this._ys;
+        let startIdx = (xCount <= yCount)? 2: 4;
+        let endIdx = (xCount <= yCount)? 3: 5;
+                
         for(let i = 0; i < this._objects.length; i++) {
             let obj1 = this._objects[i][0];
             let box1 = this._objects[i][1];
             
-            let start = 0, end = 0, arr = null;
-            let xrange = this._objects[i][3] - this._objects[i][2];
-            let yrange = this._objects[i][5] - this._objects[i][4];
-            
-            if(xrange < yrange) {
-                start = this._objects[i][2];
-                end = this._objects[i][3];
-                arr = this._xs;
-            }
-            else {
-                start = this._objects[i][4];
-                end = this._objects[i][5];
-                arr = this._ys;
-            }
+            let start = this._objects[i][startIdx];
+            let end = this._objects[i][endIdx];
             
             for(let j = start + 1; j < end; j++) {
+                if(arr[j][1]) continue;
+                
                 let obj2 = this._objects[arr[j][0]][0];
                 let box2 = this._objects[arr[j][0]][1];
-                let key = [i, arr[j][0]].sort((a, b) => a - b);
-                
-                if(key in cols) continue;
                 
                 if(collisionHandler.__insideCheck(box1, box2)) {
-                    cols[key] = true;
                     collisionHandler.addCollision(obj1, obj2);
                 }
             }
