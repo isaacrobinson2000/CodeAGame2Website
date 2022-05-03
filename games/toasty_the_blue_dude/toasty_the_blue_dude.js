@@ -2,8 +2,8 @@
  * PLAYER TEAM CODE.
  */
 class Player extends GameCollisionObject {
-    constructor(x, y, blockSize, sprites) {
-        super(x, y, blockSize, sprites);
+    constructor(x, y, assets) {
+        super(x, y, assets);
         
         this._inset = [11/32, 7/32, 1, 1];
         this._spriteSize = [12/32, 23/32];
@@ -18,7 +18,7 @@ class Player extends GameCollisionObject {
         this._boost = 22/1000;
         this._wasUp = false;
         this._numLeft = 0;
-        this._sprite = sprites.player.buildSprite();
+        this._sprite = assets.sprites.player.buildSprite();
         
         this._initHP = 20;
         this._hp = this._initHP;
@@ -33,11 +33,11 @@ class Player extends GameCollisionObject {
         this._hasDied = false;
         
         this._damage = 5;
+        this._blockSize = 1;
     }
     
     update(timeStep, gameState) {
         // Update code here. Returning true resets the entire level.
-        // NOTE: not for this lesson :) 
         this._invulnTime = Math.max(this._invulnTime - timeStep, 0);
         
         let v = this._vx2;
@@ -75,8 +75,8 @@ class Player extends GameCollisionObject {
         this.y = this._vy * timeStep + this.y
         this._wasUp = "ArrowUp" in gameState.keysPressed;
         
-        if((this._hp <= 0) 
-           || (this.y + this._spriteSize[1] >= (gameState.level.numChunks[1] * gameState.level.chunkSize))) {
+        let [__x, __y, w, h] = gameState.getLevelBounds();
+        if((this._hp <= 0) || (this.y + this._spriteSize[1] >= h)) {
             this._hasDied = true;
             this._collisionSides = {};
             this._hp = this._initHP;
@@ -87,7 +87,7 @@ class Player extends GameCollisionObject {
             this._collisionSides = {"top": true, "bottom": true, "left": true, "right": true};
             this._dead = this._dTime;
             this._hasDied = false;
-            return true;
+            gameState.exitZone(gameState.zoneName, gameState.cameraConfig);
         }
     }
     
@@ -115,13 +115,14 @@ class Player extends GameCollisionObject {
         this._sprite.draw(painter, cx, cy, cw, ch);
     }
     
-    handleCollisions(obj, side) {
+    handleCollision(obj, side) {
         if(side == "bottom") {
             if(this._vy2 >= this._minFall && this._invulnTime <= 0) {
                 this._hp -= Math.floor(this._vy2 * this._mult);
                 this._invulnTime = this._startInvTime;
             }
             this._numLeft = 2;
+            this._vy = 0;
         }
         else if(obj instanceof Entity && this._invulnTime <= 0) {
             this._hp -= obj._damage;
@@ -129,9 +130,9 @@ class Player extends GameCollisionObject {
         }
     }
     
-    getHitBox() {
+    getHitBoxes() {
         let [sw, sh] = this._spriteSize;
-        return [this.x, this.y, sw, sh];
+        return [[this.x, this.y, sw, sh]];
     }
 }
 
@@ -140,10 +141,9 @@ class Player extends GameCollisionObject {
  * ENEMY TEAM CODE.
  */
 class Entity extends GameCollisionObject {
-    constructor(x, y, blockSize, sprites) {
-        super(x, y, blockSize, sprites);
+    constructor(x, y, assets) {
+        super(x, y, assets);
         // More initialization here...
-        // NOTE: not for this lesson :) 
         this._inset = [18/64, 14/64, 1, 1];
         this._spriteSize = [26/64, 34/64];
         this._vel = 0.2/1000;
@@ -158,17 +158,17 @@ class Entity extends GameCollisionObject {
         this._knockBack = 100/1000;
         this._hp = 5;
         
-        this._sprite = sprites.imposter.buildSprite();
+        this._sprite = assets.sprites.imposter.buildSprite();
+        this._blockSize = 1;
     }
     
     update(timeStep, gameState) {
         // Update code here. Returning true destroys the enemy.
-        // NOTE: not for this lesson :) 
-        let player = gameState.getPlayer();
-        let [x, y, w, h] = player.getHitBox();
+        let player = gameState.getPlayers()[0];
+        let [x, y, w, h] = player.getBoundingBox();
         let [cx, cy] = [x + w / 2, y + h / 2];
         
-        let [ex, ey, ew, eh] = this.getHitBox();
+        let [ex, ey, ew, eh] = this.getBoundingBox();
         let [ecx, ecy] = [ex + ew / 2, ey + eh / 2]
         
         let dist = Math.sqrt((ecx - cx) ** 2 + (ecy - cy) ** 2);
@@ -192,8 +192,8 @@ class Entity extends GameCollisionObject {
         this._vy = this._ay * timeStep + this._vy;
         this.y = this._vy * timeStep + this.y;
         
-        if(this._hp <= 0 
-           || (this.y + this._spriteSize[1] >= (gameState.level.numChunks[1] * gameState.level.chunkSize))) {
+        let [__x, __y, __gw, gh] = gameState.getLevelBounds();
+        if((this._hp <= 0) || (this.y + this._spriteSize[1] >= gh)) {
             return true;
         }
     }
@@ -216,15 +216,18 @@ class Entity extends GameCollisionObject {
         this._sprite.draw(painter, cx, cy, cw, ch);
     }
     
-    handleCollisions(obj, side) {
+    handleCollision(obj, side) {
+        if(side == "bottom") {
+            this._vy = 0;
+        }
         if((obj instanceof Player) && (side == "top")) {
             this._hp -= obj._damage;
         }
     }
        
-    getHitBox() {
+    getHitBoxes() {
         let [sw, sh] = this._spriteSize;
-        return [this.x, this.y, sw, sh]
+        return [[this.x, this.y, sw, sh]];
     }
 }
 
@@ -233,11 +236,11 @@ class Entity extends GameCollisionObject {
  * BLOCK TEAM CODE.
  */
 class Block extends GameCollisionObject {
-    constructor(x, y, blockSize, sprites) {
-        super(x, y, blockSize, sprites);
+    constructor(x, y, assets) {
+        super(x, y, assets);
         // More initialization here...
         // NOTE: not for this lesson :) 
-        this._sprite = sprites.blocks.buildSprite();
+        this._sprite = assets.sprites.blocks.buildSprite();
         this._sprite.setAnimation("block");
     }
     
@@ -249,7 +252,7 @@ class Block extends GameCollisionObject {
     
     draw(canvas, painter, camera) {
         // Draw code here...
-        let [cx, cy, cw, ch] = camera.transformBox([this.x * this._blockSize , this.y * this._blockSize, this._blockSize, this._blockSize]);
+        let [cx, cy, cw, ch] = camera.transformBox(this.getBoundingBox());
                 
         this._sprite.draw(painter, cx, cy, cw, ch);
     }
@@ -263,11 +266,10 @@ class Block extends GameCollisionObject {
 }
 
 class Block2 extends GameCollisionObject {
-    constructor(x, y, blockSize, sprites) {
-        super(x, y, blockSize, sprites);
+    constructor(x, y, assets) {
+        super(x, y, assets);
         // More initialization here...
-        // NOTE: not for this lesson :) 
-        this._sprite = sprites.blocks.buildSprite();
+        this._sprite = assets.sprites.blocks.buildSprite();
         this._sprite.setAnimation("block2");
     }
     
@@ -279,7 +281,7 @@ class Block2 extends GameCollisionObject {
     
     draw(canvas, painter, camera) {
         // Draw code here...
-        let [cx, cy, cw, ch] = camera.transformBox([this.x * this._blockSize , this.y * this._blockSize, this._blockSize, this._blockSize]);
+        let [cx, cy, cw, ch] = camera.transformBox(this.getBoundingBox());
                 
         this._sprite.draw(painter, cx, cy, cw, ch);
     }
@@ -293,11 +295,11 @@ class Block2 extends GameCollisionObject {
 }
 
 class Block3 extends GameCollisionObject {
-    constructor(x, y, blockSize, sprites) {
-        super(x, y, blockSize, sprites);
+    constructor(x, y, assets) {
+        super(x, y, assets);
         // More initialization here...
         // NOTE: not for this lesson :) 
-        this._sprite = sprites.blocks.buildSprite();
+        this._sprite = assets.sprites.blocks.buildSprite();
         this._sprite.setAnimation("block3");
     }
     
@@ -309,7 +311,7 @@ class Block3 extends GameCollisionObject {
     
     draw(canvas, painter, camera) {
         // Draw code here...
-        let [cx, cy, cw, ch] = camera.transformBox([this.x * this._blockSize , this.y * this._blockSize, this._blockSize, this._blockSize]);
+        let [cx, cy, cw, ch] = camera.transformBox(this.getBoundingBox());
                 
         this._sprite.draw(painter, cx, cy, cw, ch);
     }
@@ -323,11 +325,11 @@ class Block3 extends GameCollisionObject {
 }
 
 class Block4 extends GameCollisionObject {
-    constructor(x, y, blockSize, sprites) {
-        super(x, y, blockSize, sprites);
+    constructor(x, y, assets) {
+        super(x, y, assets);
         // More initialization here...
         // NOTE: not for this lesson :) 
-        this._sprite = sprites.blocks.buildSprite();
+        this._sprite = assets.sprites.blocks.buildSprite();
         this._sprite.setAnimation("block4");
     }
     
@@ -339,7 +341,7 @@ class Block4 extends GameCollisionObject {
     
     draw(canvas, painter, camera) {
         // Draw code here...
-        let [cx, cy, cw, ch] = camera.transformBox([this.x * this._blockSize , this.y * this._blockSize, this._blockSize, this._blockSize]);
+        let [cx, cy, cw, ch] = camera.transformBox(this.getBoundingBox());
                 
         this._sprite.draw(painter, cx, cy, cw, ch);
     }
@@ -353,11 +355,10 @@ class Block4 extends GameCollisionObject {
 }
 
 class Block5 extends GameCollisionObject {
-    constructor(x, y, blockSize, sprites) {
-        super(x, y, blockSize, sprites);
+    constructor(x, y, assets) {
+        super(x, y, assets);
         // More initialization here...
-        // NOTE: not for this lesson :) 
-        this._sprite = sprites.blocks.buildSprite();
+        this._sprite = assets.sprites.blocks.buildSprite();
         this._sprite.setAnimation("block5");
     }
     
@@ -369,7 +370,7 @@ class Block5 extends GameCollisionObject {
     
     draw(canvas, painter, camera) {
         // Draw code here...
-        let [cx, cy, cw, ch] = camera.transformBox([this.x * this._blockSize , this.y * this._blockSize, this._blockSize, this._blockSize]);
+        let [cx, cy, cw, ch] = camera.transformBox(this.getBoundingBox());
                 
         this._sprite.draw(painter, cx, cy, cw, ch);
     }
@@ -382,62 +383,73 @@ class Block5 extends GameCollisionObject {
     }
 }
 
-$(document).ready(function() {
-    // We'll learn about this later....
-    let spriteData = {
-        sprites: {
-            blocks: {
-                image: "sprites/blocks.png",
-                animations: {
-                    block: {
-                        frames: [0]
-                    },
-                    block2: {
-                        frames: [1]
-                    },
-                    block3: {
-                        frames: [2]
-                    },
-                    block4: {
-                        frames: [3]
-                    },
-                    block5: {
-                        frames: [4]
-                    },
+$(document).ready(function() {    
+    $("#play-game-button").on("click", function() {
+        let gameData = {
+            objects: {
+                blocks: [Block, Block2, Block3, Block4, Block5],
+                entities: [Entity],
+                players: [Player]
+            },
+            zones: {
+                main: {
+                    zoneData: "levels/test_level.json"
                 }
             },
-            player: {
-                image: "sprites/player.png",
-                width: 32,
-                animations: {
-                    run: {
-                        frames: [1, 2, 3],
-                        speed: 100
+            assets: {
+                sprites: {
+                    blocks: {
+                        image: "sprites/blocks.png",
+                        animations: {
+                            block: {
+                                frames: [0]
+                            },
+                            block2: {
+                                frames: [1]
+                            },
+                            block3: {
+                                frames: [2]
+                            },
+                            block4: {
+                                frames: [3]
+                            },
+                            block5: {
+                                frames: [4]
+                            },
+                        }
                     },
-                    stand: {
-                        frames: [0]
+                    player: {
+                        image: "sprites/player.png",
+                        width: 32,
+                        animations: {
+                            run: {
+                                frames: [1, 2, 3],
+                                speed: 100
+                            },
+                            stand: {
+                                frames: [0]
+                            },
+                            die: {
+                                frames: [4]
+                            }
+                        }
                     },
-                    die: {
-                        frames: [4]
-                    }
-                }
-            },
-            imposter: {
-                image: "sprites/enemy.png",
-                animations: {
-                    stand: {
-                        frames: [0]
-                    },
-                    run: {
-                        frames: [0, 1, 2],
-                        speed: 100
+                    imposter: {
+                        image: "sprites/enemy.png",
+                        animations: {
+                            stand: {
+                                frames: [0]
+                            },
+                            run: {
+                                frames: [0, 1, 2],
+                                speed: 100
+                            }
+                        }
                     }
                 }
             }
-        }
-    };
-    
-    $("#play-game-button").on("click", function() {
-        element.makeGame("levels/test_level.json", [Block, Block2, Block3, Block4, Block5], [Entity], spriteData, Player);
+        };
+        
+        element.makeGame(gameData, "main");
     });
 });

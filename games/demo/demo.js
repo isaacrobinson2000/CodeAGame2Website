@@ -218,7 +218,7 @@ class Player extends PhysicsObject {
                 this._sprite.setHorizontalFlip(false);
             }
             if(!this._priorUp && ("ArrowUp" in keys) && (this._numJumps > 0)) {
-                this._vy -= 22 / 1000;
+                this._vy = -22 / 1000;
                 this._numJumps--;
                 anim = "jump";
             }
