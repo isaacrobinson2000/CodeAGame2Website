@@ -42,7 +42,7 @@ class Player extends GameCollisionObject {
         
         let v = this._vx2;
         if('ArrowUp' in gameState.keysPressed && !this._wasUp && this._numLeft > 0){
-            this._vy -= this._boost;
+            this._vy = -this._boost;
             this._numLeft--;
         }
         
@@ -146,7 +146,7 @@ class Entity extends GameCollisionObject {
         // More initialization here...
         this._inset = [18/64, 14/64, 1, 1];
         this._spriteSize = [26/64, 34/64];
-        this._vel = 0.2/1000;
+        this._vel = 3.5 / 1000;
         this._movable = true;
         this._vx = 0;
         this._vy = 0;
@@ -174,7 +174,7 @@ class Entity extends GameCollisionObject {
         let dist = Math.sqrt((ecx - cx) ** 2 + (ecy - cy) ** 2);
         
         if(dist < this._dist) {
-            this._vx = this._vel * Math.sign(cx - ecx) * timeStep;
+            this._vx = this._vel * Math.sign(cx - ecx);
         } else {
             this._vx = 0;
         }
