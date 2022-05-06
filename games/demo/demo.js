@@ -200,11 +200,27 @@ class Player extends PhysicsObject {
             gameState.exitZone(gameState.zoneName);
         }
         
-        let keys = gameState.keysPressed;
+        let keys = {...gameState.keysPressed};
         
         let anim = "stand"
         
         this._ax = 0;
+        
+        if(gameState.mouse.pressed) {
+            let [cx, cy, cw, ch] = gameState.cameras[0].getDisplayZone();
+            let [x, y] = gameState.mouse.location;
+            
+            if((cx < x) && (x < (cx + cw * (1/3)))) {
+                keys["ArrowLeft"] = true;
+            }
+            if(((cx + cw * (2/3)) < x) && (x < (cx + cw))) {
+                keys["ArrowRight"] = true;
+            }
+            if((cy < y) && (y < (cy + ch * (1/3)))) {
+                keys["ArrowUp"] = true;
+            }
+        }
+
         
         if(this._accept_inputs) {
             if("ArrowLeft" in keys) {
