@@ -602,9 +602,9 @@ class Camera {
 window.Camera = Camera;
 
 elem_proto.makeBaseGame = async function(gameLoop, gameState = {}, assets = {}, zones = {}, levelGen = null) {
-    let newDiv = $($.parseHTML("<div style='position: fixed; z-index: 300; top: 0; bottom: 0; left: 0; right: 0; background-color: white;'></div>"));
+    let newDiv = $($.parseHTML("<div style='position: fixed; z-index: 300; top: 0; bottom: 0; left: 0; right: 0; background-color: white; overflow: clip; touch-action: none;'></div>"));
     let newCanvas = $($.parseHTML("<canvas style='width: 100%; height: 100%;'>Your browser doesn't support canvas!</canvas>"));
-    let closeBtn = $($.parseHTML("<button style='position: absolute; top: 0; right: 0;'>X</button>"));
+    let closeBtn = $($.parseHTML("<button style='position: absolute; top: 0; right: 0; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;'>X</button>"));
     
     let loadDiv = $($.parseHTML("<div style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: transparent;'></div>"));
     let loadTxt = $($.parseHTML("<p style='font: 38px sans-serif; text-align: center;'>LOADING...</p>"));
@@ -738,7 +738,7 @@ elem_proto.makeBaseGame = async function(gameLoop, gameState = {}, assets = {}, 
         gameState.mouse.location = [e.offsetX, e.offsetY];
     });
     
-    newDiv.on("pointerup", (e) => {
+    newDiv.on("pointerup pointercancel", (e) => {
         gameState.mouse.location = [e.offsetX, e.offsetY];
         gameState.mouse.pressed = false;
         return false;
