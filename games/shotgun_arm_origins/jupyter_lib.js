@@ -728,25 +728,27 @@ elem_proto.makeBaseGame = async function(gameLoop, gameState = {}, assets = {}, 
     };
     
     // Mouse support....
-    newDiv.mousedown((e) => {
+    newDiv.on("pointerdown", (e) => {
         gameState.mouse.location = [e.offsetX, e.offsetY];
         gameState.mouse.pressed = true;
         return false;
     });
     
-    newDiv.mousemove((e) => {
+    newDiv.on("pointermove", (e) => {
         gameState.mouse.location = [e.offsetX, e.offsetY];
     });
     
-    newDiv.mouseup((e) => {
+    newDiv.on("pointerup", (e) => {
         gameState.mouse.location = [e.offsetX, e.offsetY];
         gameState.mouse.pressed = false;
         return false;
     });
     
-    closeBtn.mousedown(false);
-    closeBtn.mouseup(false);
-    closeBtn.mousemove(false);
+    newDiv.on("contextmenu", false);
+    
+    closeBtn.on("pointerdown", false);
+    closeBtn.on("pointermove", false);
+    closeBtn.on("pointerup", false);
     
     // Manage keyboard events, keep track of pressed keys in special property in the gameState object.
     // We have to disable all other keyevents as jupyter notebook doesn't play nicely with keyboard input.
