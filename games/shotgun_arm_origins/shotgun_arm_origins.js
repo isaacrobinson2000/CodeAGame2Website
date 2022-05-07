@@ -66,23 +66,43 @@ class Player extends GameCollisionObject {
         if(gameState.PLAYER_COUNT == undefined) gameState.PLAYER_COUNT = 0;
         if(this._index == null) this._index = gameState.PLAYER_COUNT++;
         
-        if(this._controls[0] in gameState.keysPressed) {
+        let keys = {...gameState.keysPressed};
+        
+        if(gameState.mouse.pressed) {
+            let [cx, cy, cw, ch] = gameState.cameras[0].getDisplayZone();
+            let [x, y] = gameState.mouse.location;
+            
+            if((cx < x) && (x < (cx + cw * (1/3)))) {
+                keys["ArrowLeft"] = true;
+            }
+            if(((cx + cw * (2/3)) < x) && (x < (cx + cw))) {
+                keys["ArrowRight"] = true;
+            }
+            if((cy < y) && (y < (cy + ch * (1/3)))) {
+                keys["ArrowUp"] = true;
+            }
+            if(((cy + ch * (2/3)) < y) && (x < (cx + cw))) {
+                keys["Space"] = true;
+            }
+        }
+        
+        if(this._controls[0] in keys) {
             this.x = this.x - (this._vx * timeStep);
             this._face_left = true;
             anim = "run";
         }
-        if(this._controls[1] in gameState.keysPressed){
+        if(this._controls[1] in keys){
             this.x = this.x + (this._vx * timeStep);
             this._face_left = false;
             anim = "run";
         }
-        if(!this._priorUp && this._controls[2] in gameState.keysPressed) {
+        if(!this._priorUp && this._controls[2] in keys) {
             if(this._jump_counter > 0) {
                 this._vy = -this._jumpy;
                 this._jump_counter--;
             }
         }
-        if(!this._priorSpace && this._controls[3] in gameState.keysPressed) {
+        if(!this._priorSpace && this._controls[3] in keys) {
             if(this._reload_counter >= this._reload_time) {
                 anim = "shoot";
                 this._attack(this._face_left, gameState.getEntities());
@@ -98,8 +118,8 @@ class Player extends GameCollisionObject {
         }
         this._sprite.setHorizontalFlip(!this._face_left);
         
-        this._priorUp = this._controls[2] in gameState.keysPressed;
-        this._priorSpace = this._controls[3] in gameState.keysPressed;
+        this._priorUp = this._controls[2] in keys;
+        this._priorSpace = this._controls[3] in keys;
         
         this._vy = this._vy + (this._ay * timeStep);
         this.y += this._vy * timeStep;

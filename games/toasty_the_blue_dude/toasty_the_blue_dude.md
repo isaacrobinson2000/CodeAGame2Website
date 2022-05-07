@@ -14,4 +14,7 @@ Made by the summer class of 2021.
 
 <button type="button" name="button" id="play-game-button" class="btn">Play the Game</button>
 
+## Controls
 
+ - On a computer: left and right arrow keys to move, up arrow key to jump.
+ - On a phone/tablet: Press sides of the screen to move, tap the top third of the screen to jump.

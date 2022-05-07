@@ -41,16 +41,34 @@ class Player extends GameCollisionObject {
         this._invulnTime = Math.max(this._invulnTime - timeStep, 0);
         
         let v = this._vx2;
-        if('ArrowUp' in gameState.keysPressed && !this._wasUp && this._numLeft > 0){
+        
+        let keys = {...gameState.keysPressed};
+        
+        if(gameState.mouse.pressed) {
+            let [cx, cy, cw, ch] = gameState.cameras[0].getDisplayZone();
+            let [x, y] = gameState.mouse.location;
+            
+            if((cx < x) && (x < (cx + cw * (1/3)))) {
+                keys["ArrowLeft"] = true;
+            }
+            if(((cx + cw * (2/3)) < x) && (x < (cx + cw))) {
+                keys["ArrowRight"] = true;
+            }
+            if((cy < y) && (y < (cy + ch * (1/3)))) {
+                keys["ArrowUp"] = true;
+            }
+        }
+        
+        if('ArrowUp' in keys && !this._wasUp && this._numLeft > 0){
             this._vy = -this._boost;
             this._numLeft--;
         }
         
-        if('ArrowLeft' in gameState.keysPressed){
+        if('ArrowLeft' in keys){
             v -= this._vel;
         }
         
-        if ('ArrowRight'  in gameState.keysPressed){
+        if ('ArrowRight' in keys){
             v += this._vel;
         }
         
@@ -73,7 +91,7 @@ class Player extends GameCollisionObject {
         this._vy = this._ay * timeStep + this._vy;
         this._vy2 = this._vy;
         this.y = this._vy * timeStep + this.y
-        this._wasUp = "ArrowUp" in gameState.keysPressed;
+        this._wasUp = "ArrowUp" in keys;
         
         let [__x, __y, w, h] = gameState.getLevelBounds();
         if((this._hp <= 0) || (this.y + this._spriteSize[1] >= h)) {
