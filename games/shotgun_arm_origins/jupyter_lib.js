@@ -346,9 +346,12 @@ class Sprite {
         let backY = (this._inset[1] / this._height) * outsetH;
         
         ctx.save();
-        ctx.translate((this._horiz_flip)? x + width + backX: x - backX, (this._vert_flip)? y + height + backY: y - backY);
+        ctx.translate(
+            Math.round((this._horiz_flip)? x + width + backX: x - backX), 
+            Math.round((this._vert_flip)? y + height + backY: y - backY)
+        );
         ctx.scale(this._horiz_flip? -1: 1, this._vert_flip? -1: 1);
-        ctx.drawImage(this._img, xin, 0, this._width, this._height, 0, 0, outsetW, outsetH);
+        ctx.drawImage(this._img, xin, 0, this._width, this._height, 0, 0, Math.round(outsetW), Math.round(outsetH));
         ctx.restore();
     }
 }
